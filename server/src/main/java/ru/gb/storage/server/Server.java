@@ -14,13 +14,14 @@ import ru.gb.storage.commons.handler.JsonEncoder;
 
 public class Server {
     private final int port;
+    private final UseDBforAuth useDBforAuth;
 
     public static void main(String[] args) throws InterruptedException {
         new Server(9000).start();
     }
 
     public Server(int port) {
-
+        useDBforAuth = new UseDBforAuth();
         this.port = port;
     }
 
@@ -41,7 +42,7 @@ public class Server {
                                     new LengthFieldPrepender(3),
                                     new JsonDecoder(),
                                     new JsonEncoder(),
-                                    new FirstServerHandler());
+                                    new FirstServerHandler(useDBforAuth));
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
