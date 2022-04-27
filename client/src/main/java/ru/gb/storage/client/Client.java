@@ -8,11 +8,13 @@ import javafx.stage.Stage;
 import java.io.IOException;
 
 public class Client extends Application {
+
     @Override
     public void start(Stage stage) throws IOException {
+
         FXMLLoader fxmlLoader = new FXMLLoader(Client.class.getResource("/StartWindow.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 433, 200);
-        stage.setTitle("Вход в сетевое хранилище");
+        Scene scene = new Scene(fxmlLoader.load(), 517, 348);
+        stage.setTitle("Сетевое хранилище");
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
