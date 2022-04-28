@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="348.0"
       prefWidth="517.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
@@ -15,43 +11,43 @@
    <HBox alignment="CENTER" prefHeight="29.0" prefWidth="600.0">
       <Label text="Добро пожаловать в сетевое хранилище!">
          <font>
-            <Font name="System Bold" size="14.0"/>
+            <Font name="System Bold" size="14.0" />
          </font>
       </Label>
    </HBox>
    <HBox prefHeight="286.0" prefWidth="489.0">
       <VBox alignment="CENTER" prefHeight="375.0" prefWidth="287.0" spacing="30.0">
          <padding>
-            <Insets bottom="15.0" left="50.0" right="50.0" top="10.0"/>
+            <Insets bottom="15.0" left="50.0" right="50.0" top="10.0" />
          </padding>
          <Label text="Аутентификация">
             <font>
-               <Font name="System Bold" size="14.0"/>
+               <Font name="System Bold" size="14.0" />
             </font>
          </Label>
-         <TextField fx:id="fldSignInLogin" promptText="Введите логин"/>
-         <PasswordField fx:id="fldSignInPassword" promptText="Введите пароль"/>
-         <Button fx:id="btnSignIn" mnemonicParsing="false" onAction="#signInFunc" text="Войти"/>
+         <TextField fx:id="fldSignInLogin" promptText="Введите логин" />
+         <PasswordField fx:id="fldSignInPassword" promptText="Введите пароль" />
+         <Button fx:id="btnSignIn" mnemonicParsing="false" onAction="#signInFunc" text="Войти" />
       </VBox>
       <VBox alignment="CENTER" prefHeight="375.0" prefWidth="313.0" spacing="20.0">
          <padding>
-            <Insets left="40.0" right="40.0"/>
+            <Insets left="40.0" right="40.0" />
          </padding>
          <Label text="Регистрация">
             <font>
-               <Font name="System Bold" size="14.0"/>
+               <Font name="System Bold" size="14.0" />
             </font>
          </Label>
-         <TextField fx:id="fldSignUpLogin" promptText="Введите логин"/>
-         <PasswordField fx:id="fldSignUpPassword" promptText="Введите пароль"/>
-         <TextField fx:id="fldSignUpFirstName" promptText="Введите имя"/>
-         <TextField fx:id="fldSignUpLastName" promptText="Введите фамилию"/>
-         <Button fx:id="btnSignUp" mnemonicParsing="false" onAction="#SignUpFunc" text="Зарегистрироваться"/>
+         <TextField fx:id="fldSignUpLogin" promptText="Введите логин" />
+         <PasswordField fx:id="fldSignUpPassword" promptText="Введите пароль" />
+         <TextField fx:id="fldSignUpFirstName" promptText="Введите имя" />
+         <TextField fx:id="fldSignUpLastName" promptText="Введите фамилию" />
+         <Button fx:id="btnSignUp" mnemonicParsing="false" onAction="#SignUpFunc" text="Зарегистрироваться" />
       </VBox>
    </HBox>
    <HBox alignment="CENTER" prefHeight="29.0" prefWidth="600.0">
-      <Label fx:id="lblMessage" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-             prefHeight="100.0" prefWidth="489.0"
+      <Label fx:id="lblMessage" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308"
+             maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="489.0"
              text="Если вы зарегистрированы, пройдите атентификацию. Если нет, пройдите регистрацию!"/>
    </HBox>
 </VBox>

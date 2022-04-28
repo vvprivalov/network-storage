@@ -8,15 +8,13 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     private final UseDBforAuth useDBforAuth;
 
     public FirstServerHandler(UseDBforAuth useDBforAuth) {
+
         this.useDBforAuth = useDBforAuth;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println("Новый канал активирован");
-        TextMessage answer = new TextMessage();
-        answer.setText("Успешное соединение с сервером");
-        ctx.writeAndFlush(answer);
     }
 
     @Override
@@ -24,14 +22,29 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         // Пришло сообщение об авторизации
         if (msg instanceof SignInMessage) {
             SignInMessage message = (SignInMessage) msg;
-            String login = message.getLogin();
-            String password = message.getPassword();
-            boolean isDone = useDBforAuth.checkLoginAndPasswordAtIdentification(login, password);
+            boolean isDone = useDBforAuth.checkLoginAndPasswordAtIdentification(message.getLogin(), message.getPassword());
+            TextMessage answer = new TextMessage();
             if (isDone) {
-                System.out.println("Вы вошли в сетевое хранилище");
+                answer.setText("Вы аутентифицированы. Ожидайте вход с систему.....");
+                ctx.writeAndFlush(answer);
             } else {
-                System.out.println("Пользователь с таким логином не зарегистрирован");
+                answer.setText("Пользователь [ " + message.getLogin() + " ] не зарегистрирован");
+                ctx.writeAndFlush(answer);
             }
+        }
+
+        // Пришло сообщение о регистрации нового пользователя
+        if (msg instanceof SignUpMessage) {
+            SignUpMessage message = (SignUpMessage) msg;
+            TextMessage answer = new TextMessage();
+            boolean isDone = useDBforAuth.newUserRegistration(message.getLogin(), message.getPassword(),
+                    message.getFirstName(), message.getLastName());
+            if (isDone) {
+                answer.setText("Вы зарегистрированы. Ожидайте вход с систему.....");
+            } else {
+                answer.setText("Пользователь [ " + message.getLogin() + " ] уже зарегистрирован");
+            }
+            ctx.writeAndFlush(answer);
         }
     }
 

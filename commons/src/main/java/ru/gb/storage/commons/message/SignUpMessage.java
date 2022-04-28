@@ -2,7 +2,7 @@ package ru.gb.storage.commons.message;
 
 public class SignUpMessage extends Message{
     private String login;
-    private String pasword;
+    private String password;
     private String firstName;
     private String lastName;
 
@@ -14,12 +14,12 @@ public class SignUpMessage extends Message{
         this.login = login;
     }
 
-    public String getPasword() {
-        return pasword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasword(String pasword) {
-        this.pasword = pasword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getFirstName() {

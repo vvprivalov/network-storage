@@ -1,5 +1,7 @@
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -15,8 +17,8 @@ import javafx.scene.control.TextField;
 import ru.gb.storage.client.FirstClientHandler;
 import ru.gb.storage.commons.handler.JsonDecoder;
 import ru.gb.storage.commons.handler.JsonEncoder;
-import ru.gb.storage.commons.message.Message;
 import ru.gb.storage.commons.message.SignInMessage;
+import ru.gb.storage.commons.message.SignUpMessage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -56,7 +58,17 @@ public class StartWindowController implements Initializable {
 
     @FXML
     void SignUpFunc(ActionEvent event) {
-
+        if (fldSignUpLastName.getText().equals("") | fldSignUpFirstName.getText().equals("") |
+                fldSignUpLogin.getText().equals("") | fldSignUpPassword.getText().equals("")) {
+            lblMessage.setText("Все поля формы должны быть заполнены");
+            return;
+        }
+        SignUpMessage signUpMessage = new SignUpMessage();
+        signUpMessage.setLogin(fldSignUpLogin.getText());
+        signUpMessage.setPassword(fldSignUpPassword.getText());
+        signUpMessage.setFirstName(fldSignUpFirstName.getText());
+        signUpMessage.setLastName(fldSignUpLastName.getText());
+        channelFuture.channel().writeAndFlush(signUpMessage);
     }
 
     @FXML
@@ -71,7 +83,7 @@ public class StartWindowController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         ExecutorService threadpool = Executors.newFixedThreadPool(1);
 
-        threadpool.execute(() -> Connect());
+        threadpool.execute(this::Connect);
     }
 
     public void Connect() {
@@ -90,7 +102,7 @@ public class StartWindowController implements Initializable {
                                     new LengthFieldPrepender(3),
                                     new JsonDecoder(),
                                     new JsonEncoder(),
-                                    new FirstClientHandler());
+                                    new FirstClientHandler(lblMessage));
                         }
                     });
 
