@@ -9,17 +9,24 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+import ru.gb.storage.client.Client;
 import ru.gb.storage.client.FirstClientHandler;
 import ru.gb.storage.commons.handler.JsonDecoder;
 import ru.gb.storage.commons.handler.JsonEncoder;
 import ru.gb.storage.commons.message.SignInMessage;
 import ru.gb.storage.commons.message.SignUpMessage;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +64,7 @@ public class StartWindowController implements Initializable {
     private Label lblMessage;
 
     @FXML
-    void SignUpFunc(ActionEvent event) {
+    void SignUpFunc(ActionEvent event) throws IOException {
         if (fldSignUpLastName.getText().equals("") | fldSignUpFirstName.getText().equals("") |
                 fldSignUpLogin.getText().equals("") | fldSignUpPassword.getText().equals("")) {
             lblMessage.setText("Все поля формы должны быть заполнены");
@@ -69,14 +76,27 @@ public class StartWindowController implements Initializable {
         signUpMessage.setFirstName(fldSignUpFirstName.getText());
         signUpMessage.setLastName(fldSignUpLastName.getText());
         channelFuture.channel().writeAndFlush(signUpMessage);
+        startMainWindow(event, fldSignUpLogin);
     }
 
     @FXML
-    void signInFunc(ActionEvent event) {
+    void signInFunc(ActionEvent event) throws IOException {
         signInMessage = new SignInMessage();
         signInMessage.setLogin(fldSignInLogin.getText());
         signInMessage.setPassword(fldSignInPassword.getText());
         channelFuture.channel().writeAndFlush(signInMessage);
+        startMainWindow(event, fldSignInLogin);
+    }
+
+    // метод запускающий основное окно хранилища
+    private void startMainWindow(ActionEvent event, TextField fldSignUpLogin) throws IOException {
+        Stage primaryStage = (Stage) ((Node) (event.getSource())).getScene().getWindow();
+        FXMLLoader fxmlLoader = new FXMLLoader(Client.class.getResource("/Main.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        primaryStage.setTitle("Сетевое хранилище");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(true);
+        primaryStage.show();
     }
 
     @Override
