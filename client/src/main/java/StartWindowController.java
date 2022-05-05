@@ -76,7 +76,12 @@ public class StartWindowController implements Initializable {
         signUpMessage.setFirstName(fldSignUpFirstName.getText());
         signUpMessage.setLastName(fldSignUpLastName.getText());
         channelFuture.channel().writeAndFlush(signUpMessage);
-        startMainWindow(event, fldSignUpLogin);
+
+        // Заминка, ну сразу обновляется строка, поэтому, чтобы зайти в основное окно, приходится дважды кликать
+        // КАК ЭТО УСТРАНИТЬ?????
+        if (lblMessage.getText().startsWith("Вы")) {
+            startMainWindow(event, fldSignUpLogin);
+        }
     }
 
     @FXML
@@ -85,11 +90,16 @@ public class StartWindowController implements Initializable {
         signInMessage.setLogin(fldSignInLogin.getText());
         signInMessage.setPassword(fldSignInPassword.getText());
         channelFuture.channel().writeAndFlush(signInMessage);
-        startMainWindow(event, fldSignInLogin);
+
+        // Заминка, ну сразу обновляется строка, поэтому, чтобы зайти в основное окно, приходится дважды кликать
+        // КАК ЭТО УСТРАНИТЬ?????
+        if (lblMessage.getText().startsWith("Вы")) {
+            startMainWindow(event, fldSignInLogin);
+        }
     }
 
     // метод запускающий основное окно хранилища
-    private void startMainWindow(ActionEvent event, TextField fldSignUpLogin) throws IOException {
+    private void startMainWindow(ActionEvent event, TextField login) throws IOException {
         Stage primaryStage = (Stage) ((Node) (event.getSource())).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(Client.class.getResource("/Main.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 900, 600);

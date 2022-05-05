@@ -10,6 +10,7 @@ import ru.gb.storage.commons.message.TextMessage;
 public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
     private final Label lblMessage;
     public FirstClientHandler(Label lblMessage) {
+
         this.lblMessage = lblMessage;
     }
 

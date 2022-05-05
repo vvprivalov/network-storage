@@ -28,7 +28,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
                 answer.setText("Вы аутентифицированы. Ожидайте вход с систему.....");
                 ctx.writeAndFlush(answer);
             } else {
-                answer.setText("Пользователь [ " + message.getLogin() + " ] не зарегистрирован");
+                answer.setText("Пользователь [ " + message.getLogin() + " ] или пароль не верны!!!");
                 ctx.writeAndFlush(answer);
             }
         }

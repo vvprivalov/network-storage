@@ -17,19 +17,19 @@
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <ComboBox fx:id="leftComboDisk" prefWidth="50.0"/>
-            <TextField fx:id="leftFldPath" HBox.hgrow="ALWAYS" editable="false"/>
-            <Button fx:id="leftBtnUp" mnemonicParsing="false" text="Вверх"/>
+            <ComboBox fx:id="leftComboDisk" focusTraversable="false"  prefWidth="60.0" onAction="#leftComboAction"/>
+            <TextField fx:id="leftFldPath" HBox.hgrow="ALWAYS" focusTraversable="false" disable="true" editable="false"/>
+            <Button fx:id="leftBtnUp" mnemonicParsing="false" focusTraversable="false" text="Вверх"
+            onAction="#btnUpAction"/>
         </HBox>
         <TableView fx:id="leftTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <Button fx:id="leftBtnChange" mnemonicParsing="false" text="Изменить"/>
-            <Button fx:id="leftBtnCopy" mnemonicParsing="false" text="Копировать"/>
-            <Button fx:id="leftBtnMove" mnemonicParsing="false" text="Переместить"/>
-            <Button fx:id="leftBtnDelete" mnemonicParsing="false" text="Удалить"/>
+            <Button fx:id="leftBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
+            <Button fx:id="leftBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
+            <Button fx:id="leftBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"/>
         </HBox>
     </VBox>
     <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
@@ -37,19 +37,18 @@
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <ComboBox fx:id="rightComboDisk" prefWidth="50.0"/>
-            <TextField fx:id="rightFldPath" HBox.hgrow="ALWAYS" editable="false"/>
-            <Button fx:id="rightBtnUp" mnemonicParsing="false" text="Вверх"/>
+            <TextField fx:id="rightFldPath" focusTraversable="false" HBox.hgrow="ALWAYS" disable="true" editable="false"/>
+            <Button fx:id="rightBtnUp" focusTraversable="false" mnemonicParsing="false" text="Вверх"/>
         </HBox>
         <TableView fx:id="rightTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <Button fx:id="rightBtnChange" mnemonicParsing="false" text="Изменить"/>
-            <Button fx:id="rightBtnCopy" mnemonicParsing="false" text="Копировать"/>
-            <Button fx:id="rightBtnMove" mnemonicParsing="false" text="Переместить"/>
-            <Button fx:id="rightBtnDelete" mnemonicParsing="false" text="Удалить"/>
+            <Button fx:id="rightBtnChange" mnemonicParsing="false" focusTraversable="false" text="Создать папку"/>
+            <Button fx:id="rightBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
+            <Button fx:id="rightBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
+            <Button fx:id="rightBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"/>
         </HBox>
     </VBox>
 </HBox>
