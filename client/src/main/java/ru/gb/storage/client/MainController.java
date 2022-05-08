@@ -70,12 +70,10 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Формирование левой панели
-        // Первый столбец "Имя"
         TableColumn<FileInfoMessage, String> leftFileNameColumn = new TableColumn<>("Имя");
         leftFileNameColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFileName()));
-        leftFileNameColumn.setPrefWidth(140);
+        leftFileNameColumn.setPrefWidth(240);
 
-        // Второй столбец "Размер"
         TableColumn<FileInfoMessage, Long> leftFileSizeColumn = new TableColumn<>("Размер");
         leftFileSizeColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getFileSize()));
         leftFileSizeColumn.setCellFactory(column -> {
@@ -96,19 +94,17 @@ public class MainController implements Initializable {
                 }
             };
         });
-        leftFileSizeColumn.setPrefWidth(70);
+        leftFileSizeColumn.setPrefWidth(100);
 
-        // Третий столбец "Дата"
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         TableColumn<FileInfoMessage, String> leftFileDateColumn = new TableColumn<>("Дата изменения");
         leftFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified().format(dtf)));
         leftFileDateColumn.setPrefWidth(120);
 
-
         // Формирование правой панели
         TableColumn<FileInfoMessage, String> rightFileNameColumn = new TableColumn<>("Имя");
         rightFileNameColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFileName()));
-        rightFileNameColumn.setPrefWidth(140);
+        rightFileNameColumn.setPrefWidth(240);
 
         TableColumn<FileInfoMessage, Long> rightFileSizeColumn = new TableColumn<>("Размер");
         rightFileSizeColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getFileSize()));
@@ -130,29 +126,27 @@ public class MainController implements Initializable {
                 }
             };
         });
-        rightFileSizeColumn.setPrefWidth(70);
+        rightFileSizeColumn.setPrefWidth(100);
 
-        // Третий столбец "Дата"
         DateTimeFormatter dtfR = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         TableColumn<FileInfoMessage, String> rightFileDateColumn = new TableColumn<>("Дата изменения");
         rightFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified().format(dtf)));
         rightFileDateColumn.setPrefWidth(120);
 
-
+        // Добавляем сформированные колонки в таблицу
         leftTableView.getColumns().addAll(leftFileNameColumn, leftFileSizeColumn, leftFileDateColumn);
         leftTableView.getSortOrder().add(leftFileSizeColumn);
-
         rightTableView.getColumns().addAll(rightFileNameColumn, rightFileSizeColumn, rightFileDateColumn);
         leftTableView.getSortOrder().add(rightFileSizeColumn);
 
-        // Формирование комбобокса для отображения списка дисков
+        // Формирование левого комбобокса для отображения списка дисков
         leftComboDisk.getItems().clear();
         for (Path p : FileSystems.getDefault().getRootDirectories()) {
             leftComboDisk.getItems().add(p.toString());
         }
         leftComboDisk.getSelectionModel().select(0);
 
-        // Метод, который по двойному клику мыши заходит в каталог
+        // Метод, который по двойному клику мыши заходит в каталог для левой панели
         leftTableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -161,6 +155,20 @@ public class MainController implements Initializable {
                             .getSelectedItem().getFileName());
                     if (Files.isDirectory(path)) {
                         updateList(path, 1);
+                    }
+                }
+            }
+        });
+
+        // Метод, который по двойному клику мыши заходит в каталог для правой панели
+        rightTableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getClickCount() == 2) {
+                    Path path = Paths.get(rightFldPath.getText()).resolve(rightTableView.getSelectionModel()
+                            .getSelectedItem().getFileName());
+                    if (Files.isDirectory(path)) {
+                        updateList(path, 2);
                     }
                 }
             }
@@ -193,13 +201,23 @@ public class MainController implements Initializable {
         }
     }
 
-    public void btnUpAction(ActionEvent actionEvent) {
+    // метод, отвечающий за нажатие кнопки [Вверх] для левой панели
+    public void leftBtnUpAction(ActionEvent actionEvent) {
         Path upperPath = Paths.get(leftFldPath.getText()).getParent();
         if (upperPath != null) {
             updateList(upperPath, 1);
         }
     }
 
+    // метод, отвечающий за нажатие кнопки [Вверх] для правой панели
+    public void rightBtnUpAction(ActionEvent actionEvent) {
+        Path upperPath = Paths.get(rightFldPath.getText()).getParent();
+        if (upperPath != null) {
+            updateList(upperPath, 2);
+        }
+    }
+
+    // метод, отвечающий за работу левого Комбобокса
     public void leftComboAction(ActionEvent actionEvent) {
         ComboBox<String> element = (ComboBox<String>) actionEvent.getSource();
         updateList(Paths.get(element.getSelectionModel().getSelectedItem()), 1);

@@ -22,14 +22,19 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         // Пришло сообщение об авторизации
         if (msg instanceof SignInMessage) {
             SignInMessage message = (SignInMessage) msg;
+            SignAnswer signAnswer = new SignAnswer();
             boolean isDone = useDBforAuth.checkLoginAndPasswordAtIdentification(message.getLogin(), message.getPassword());
             TextMessage answer = new TextMessage();
             if (isDone) {
+                signAnswer.setbAnswer(true);
                 answer.setText("Вы аутентифицированы. Ожидайте вход с систему.....");
                 ctx.writeAndFlush(answer);
+                ctx.writeAndFlush(signAnswer);
             } else {
+                signAnswer.setbAnswer(false);
                 answer.setText("Пользователь [ " + message.getLogin() + " ] или пароль не верны!!!");
                 ctx.writeAndFlush(answer);
+                ctx.writeAndFlush(signAnswer);
             }
         }
 

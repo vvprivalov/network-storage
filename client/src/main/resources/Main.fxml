@@ -10,7 +10,7 @@
 
 
 <HBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0"
-      prefWidth="900.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      prefWidth="1000.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ru.gb.storage.client.MainController">
     <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">
         <HBox maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
@@ -20,7 +20,7 @@
             <ComboBox fx:id="leftComboDisk" focusTraversable="false"  prefWidth="60.0" onAction="#leftComboAction"/>
             <TextField fx:id="leftFldPath" HBox.hgrow="ALWAYS" focusTraversable="false" disable="true" editable="false"/>
             <Button fx:id="leftBtnUp" mnemonicParsing="false" focusTraversable="false" text="Вверх"
-            onAction="#btnUpAction"/>
+            onAction="#leftBtnUpAction"/>
         </HBox>
         <TableView fx:id="leftTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
@@ -38,7 +38,8 @@
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
             <TextField fx:id="rightFldPath" focusTraversable="false" HBox.hgrow="ALWAYS" disable="true" editable="false"/>
-            <Button fx:id="rightBtnUp" focusTraversable="false" mnemonicParsing="false" text="Вверх"/>
+            <Button fx:id="rightBtnUp" focusTraversable="false" mnemonicParsing="false" text="Вверх"
+            onAction="#rightBtnUpAction"/>
         </HBox>
         <TableView fx:id="rightTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">

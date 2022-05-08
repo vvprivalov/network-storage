@@ -7,7 +7,7 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="348.0"
       prefWidth="517.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="StartWindowController">
+      fx:controller="ru.gb.storage.client.StartWindowController" >
    <HBox alignment="CENTER" prefHeight="29.0" prefWidth="600.0">
       <Label text="Добро пожаловать в сетевое хранилище!">
          <font>

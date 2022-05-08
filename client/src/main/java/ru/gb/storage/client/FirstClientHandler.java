@@ -5,10 +5,12 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import ru.gb.storage.commons.message.Message;
+import ru.gb.storage.commons.message.SignAnswer;
 import ru.gb.storage.commons.message.TextMessage;
 
 public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
     private final Label lblMessage;
+
     public FirstClientHandler(Label lblMessage) {
 
         this.lblMessage = lblMessage;
@@ -19,6 +21,13 @@ public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
         if (message instanceof TextMessage) {
             TextMessage msg = (TextMessage) message;
             Platform.runLater(() -> lblMessage.setText(msg.getText()));
+
+        }
+        if (message instanceof SignAnswer) {
+            SignAnswer answer = (SignAnswer) message;
+            if (answer.isbAnswer()) {
+
+            }
         }
     }
 }

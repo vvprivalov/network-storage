@@ -1,3 +1,5 @@
+package ru.gb.storage.client;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -12,15 +14,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import javafx.stage.Window;
-import ru.gb.storage.client.Client;
-import ru.gb.storage.client.FirstClientHandler;
 import ru.gb.storage.commons.handler.JsonDecoder;
 import ru.gb.storage.commons.handler.JsonEncoder;
 import ru.gb.storage.commons.message.SignInMessage;
@@ -93,16 +93,17 @@ public class StartWindowController implements Initializable {
 
         // Заминка, ну сразу обновляется строка, поэтому, чтобы зайти в основное окно, приходится дважды кликать
         // КАК ЭТО УСТРАНИТЬ?????
-        if (lblMessage.getText().startsWith("Вы")) {
-            startMainWindow(event, fldSignInLogin);
-        }
+//        if (lblMessage.getText().startsWith("Вы")) {
+//            startMainWindow(event, fldSignInLogin);
+//        }
     }
 
     // метод запускающий основное окно хранилища
-    private void startMainWindow(ActionEvent event, TextField login) throws IOException {
+    public void startMainWindow(ActionEvent event, TextField login) throws IOException {
         Stage primaryStage = (Stage) ((Node) (event.getSource())).getScene().getWindow();
         FXMLLoader fxmlLoader = new FXMLLoader(Client.class.getResource("/Main.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 900, 600);
+        Parent parent = fxmlLoader.load();
+        Scene scene = new Scene(parent, 1000, 600);
         primaryStage.setTitle("Сетевое хранилище");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
@@ -111,6 +112,7 @@ public class StartWindowController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         ExecutorService threadpool = Executors.newFixedThreadPool(1);
 
         threadpool.execute(this::Connect);
@@ -152,4 +154,3 @@ public class StartWindowController implements Initializable {
         }
     }
 }
-
