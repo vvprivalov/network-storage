@@ -3,30 +3,34 @@ package ru.gb.storage.client;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import javafx.application.Platform;
-import javafx.scene.control.Label;
 import ru.gb.storage.commons.message.Message;
 import ru.gb.storage.commons.message.SignAnswer;
 import ru.gb.storage.commons.message.TextMessage;
 
+import java.io.IOException;
+
+
 public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
-    private final Label lblMessage;
-
-    public FirstClientHandler(Label lblMessage) {
-
-        this.lblMessage = lblMessage;
-    }
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Message message) {
+        // Получение от сервера текстового сообщения
         if (message instanceof TextMessage) {
             TextMessage msg = (TextMessage) message;
-            Platform.runLater(() -> lblMessage.setText(msg.getText()));
-
+            Platform.runLater(() -> Client.startController.lblMessage.setText(msg.getText()));
         }
+
+        // Получение от сервера сообщения об успешности авторизации
         if (message instanceof SignAnswer) {
             SignAnswer answer = (SignAnswer) message;
             if (answer.isbAnswer()) {
-
+                Platform.runLater(() -> {
+                    try {
+                        Client.startController.startMainWindow();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
         }
     }

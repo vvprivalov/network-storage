@@ -13,13 +13,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ru.gb.storage.commons.handler.JsonDecoder;
 import ru.gb.storage.commons.handler.JsonEncoder;
@@ -37,7 +37,10 @@ public class StartWindowController implements Initializable {
     ChannelFuture channelFuture;
 
     @FXML
-    private Button btnSignIn;
+    private VBox parentVBox;
+
+    @FXML
+    public Button btnSignIn;
 
     @FXML
     private Button btnSignUp;
@@ -61,11 +64,12 @@ public class StartWindowController implements Initializable {
     private PasswordField fldSignUpPassword;
 
     @FXML
-    private Label lblMessage;
+    public Label lblMessage;
 
     @FXML
-    void SignUpFunc(ActionEvent event) throws IOException {
-        if (fldSignUpLastName.getText().equals("") | fldSignUpFirstName.getText().equals("") |
+    void SignUpFunc(ActionEvent event) {
+        if (fldSignUpLastName.getText().equals("" +
+                "") | fldSignUpFirstName.getText().equals("") |
                 fldSignUpLogin.getText().equals("") | fldSignUpPassword.getText().equals("")) {
             lblMessage.setText("Все поля формы должны быть заполнены");
             return;
@@ -76,33 +80,22 @@ public class StartWindowController implements Initializable {
         signUpMessage.setFirstName(fldSignUpFirstName.getText());
         signUpMessage.setLastName(fldSignUpLastName.getText());
         channelFuture.channel().writeAndFlush(signUpMessage);
-
-        // Заминка, ну сразу обновляется строка, поэтому, чтобы зайти в основное окно, приходится дважды кликать
-        // КАК ЭТО УСТРАНИТЬ?????
-        if (lblMessage.getText().startsWith("Вы")) {
-            startMainWindow(event, fldSignUpLogin);
-        }
     }
 
     @FXML
-    void signInFunc(ActionEvent event) throws IOException {
+    void signInFunc(ActionEvent event) {
         signInMessage = new SignInMessage();
         signInMessage.setLogin(fldSignInLogin.getText());
         signInMessage.setPassword(fldSignInPassword.getText());
         channelFuture.channel().writeAndFlush(signInMessage);
-
-        // Заминка, ну сразу обновляется строка, поэтому, чтобы зайти в основное окно, приходится дважды кликать
-        // КАК ЭТО УСТРАНИТЬ?????
-//        if (lblMessage.getText().startsWith("Вы")) {
-//            startMainWindow(event, fldSignInLogin);
-//        }
     }
 
     // метод запускающий основное окно хранилища
-    public void startMainWindow(ActionEvent event, TextField login) throws IOException {
-        Stage primaryStage = (Stage) ((Node) (event.getSource())).getScene().getWindow();
+    public void startMainWindow() throws IOException {
+        Stage primaryStage = (Stage) (parentVBox.getScene().getWindow());
         FXMLLoader fxmlLoader = new FXMLLoader(Client.class.getResource("/Main.fxml"));
         Parent parent = fxmlLoader.load();
+        Client.mainController = fxmlLoader.getController();
         Scene scene = new Scene(parent, 1000, 600);
         primaryStage.setTitle("Сетевое хранилище");
         primaryStage.setScene(scene);
@@ -112,9 +105,7 @@ public class StartWindowController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         ExecutorService threadpool = Executors.newFixedThreadPool(1);
-
         threadpool.execute(this::Connect);
     }
 
@@ -134,7 +125,7 @@ public class StartWindowController implements Initializable {
                                     new LengthFieldPrepender(3),
                                     new JsonDecoder(),
                                     new JsonEncoder(),
-                                    new FirstClientHandler(lblMessage));
+                                    new FirstClientHandler());
                         }
                     });
 
@@ -145,7 +136,6 @@ public class StartWindowController implements Initializable {
             while (channelFuture.channel().isActive()) {
 
             }
-
             channelFuture.channel().closeFuture().sync();
         } catch (InterruptedException e) {
             e.printStackTrace();
