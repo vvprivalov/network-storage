@@ -19,37 +19,39 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
+        SignAnswer signAnswer = new SignAnswer();
+        TextMessage textAnswer = new TextMessage();
+
         // Пришло сообщение об авторизации
         if (msg instanceof SignInMessage) {
             SignInMessage message = (SignInMessage) msg;
-            SignAnswer signAnswer = new SignAnswer();
-            boolean isDone = useDBforAuth.checkLoginAndPasswordAtIdentification(message.getLogin(), message.getPassword());
-            TextMessage answer = new TextMessage();
+            boolean isDone = useDBforAuth.checkLoginAndPasswordAtIdentification(message.getLogin(),
+                    message.getPassword());
             if (isDone) {
                 signAnswer.setbAnswer(true);
-                answer.setText("Вы аутентифицированы. Ожидайте вход с систему.....");
-                ctx.writeAndFlush(answer);
-                ctx.writeAndFlush(signAnswer);
+                textAnswer.setText("Вы аутентифицированы. Ожидайте вход с систему.....");
             } else {
                 signAnswer.setbAnswer(false);
-                answer.setText("Пользователь [ " + message.getLogin() + " ] или пароль не верны!!!");
-                ctx.writeAndFlush(answer);
-                ctx.writeAndFlush(signAnswer);
+                textAnswer.setText("Пользователь [ " + message.getLogin() + " ] или пароль не верны!!!");
             }
+            ctx.writeAndFlush(textAnswer);
+            ctx.writeAndFlush(signAnswer);
         }
 
         // Пришло сообщение о регистрации нового пользователя
         if (msg instanceof SignUpMessage) {
             SignUpMessage message = (SignUpMessage) msg;
-            TextMessage answer = new TextMessage();
             boolean isDone = useDBforAuth.newUserRegistration(message.getLogin(), message.getPassword(),
                     message.getFirstName(), message.getLastName());
             if (isDone) {
-                answer.setText("Вы зарегистрированы. Ожидайте вход с систему.....");
+                signAnswer.setbAnswer(true);
+                textAnswer.setText("Вы зарегистрированы. Ожидайте вход с систему.....");
             } else {
-                answer.setText("Пользователь [ " + message.getLogin() + " ] уже зарегистрирован");
+                signAnswer.setbAnswer(false);
+                textAnswer.setText("Пользователь [ " + message.getLogin() + " ] уже зарегистрирован");
             }
-            ctx.writeAndFlush(answer);
+            ctx.writeAndFlush(textAnswer);
+            ctx.writeAndFlush(signAnswer);
         }
     }
 
@@ -60,8 +62,5 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
-
-        System.out.println("Клиент отключился");
-    }
+    public void channelInactive(ChannelHandlerContext ctx) { System.out.println("Клиент отключился"); }
 }

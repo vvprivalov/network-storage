@@ -69,7 +69,7 @@ public class StartWindowController implements Initializable {
     @FXML
     void SignUpFunc(ActionEvent event) {
         if (fldSignUpLastName.getText().equals("" +
-                "") | fldSignUpFirstName.getText().equals("") |
+                "") || fldSignUpFirstName.getText().equals("") |
                 fldSignUpLogin.getText().equals("") | fldSignUpPassword.getText().equals("")) {
             lblMessage.setText("Все поля формы должны быть заполнены");
             return;
