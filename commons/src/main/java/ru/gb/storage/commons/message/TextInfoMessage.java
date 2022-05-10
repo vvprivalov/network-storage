@@ -1,6 +1,6 @@
 package ru.gb.storage.commons.message;
 
-public class TextMessage extends Message {
+public class TextInfoMessage extends Message {
     private String text;
 
     public String getText() {

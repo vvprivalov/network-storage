@@ -9,6 +9,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import ru.gb.storage.commons.message.FileInfoMessage;
+import ru.gb.storage.commons.message.FileListMessage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,8 +18,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MainController implements Initializable {
 
@@ -154,13 +158,13 @@ public class MainController implements Initializable {
                     Path path = Paths.get(leftFldPath.getText()).resolve(leftTableView.getSelectionModel()
                             .getSelectedItem().getFileName());
                     if (Files.isDirectory(path)) {
-                        updateList(path, 1);
+                        updateListLeft(path);
                     }
                 }
             }
         });
 
-        // Метод, который по двойному клику мыши заходит в каталог для правой панели
+        // !!!!!!!!!!!!!!!!!!!!! Метод, который по двойному клику мыши заходит в каталог для правой панели
         rightTableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
@@ -168,58 +172,63 @@ public class MainController implements Initializable {
                     Path path = Paths.get(rightFldPath.getText()).resolve(rightTableView.getSelectionModel()
                             .getSelectedItem().getFileName());
                     if (Files.isDirectory(path)) {
-                        updateList(path, 2);
+//                        updateList(path, 2);
                     }
                 }
             }
         });
 
         // Обновление списка файлов левой панели
-        updateList(Paths.get("."), 1);
-        // Обновление списка файлов правой панели
-        updateList(Paths.get("D:\\"), 2);
+        updateListLeft(Paths.get("."));
     }
 
-    // метод, который обновляет список файлов в правой и левой таблице
-    public void updateList(Path path, int side) {
+    // метод, который обновляет список файлов в левой таблице
+    public void updateListLeft(Path path) {
+        leftFldPath.setText(path.normalize().toAbsolutePath().toString());
+        leftTableView.getItems().clear();
         try {
-            if (side == 1) {
-                leftFldPath.setText(path.normalize().toAbsolutePath().toString());
-                leftTableView.getItems().clear();
-                leftTableView.getItems().addAll(Files.list(path).map(FileInfoMessage::new).collect(Collectors.toList()));
-                leftTableView.sort();
-            } else if (side == 2) {
-                rightFldPath.setText(path.normalize().toAbsolutePath().toString());
-                rightTableView.getItems().clear();
-                rightTableView.getItems().addAll(Files.list(path).map(FileInfoMessage::new).collect(Collectors.toList()));
-                rightTableView.sort();
-
+            ArrayList <Path> listPath = (ArrayList<Path>) Files.list(path).collect(Collectors.toList());
+            for (Path pth : listPath) {
+                FileInfoMessage fileInfoMessage = new FileInfoMessage();
+                fileInfoMessage.fillInfoFile(pth);
+                leftTableView.getItems().add(fileInfoMessage);
             }
         } catch (IOException e) {
-            Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов", ButtonType.OK);
+            Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов",
+                    ButtonType.OK);
             alert.showAndWait();
         }
+        leftTableView.sort();
+
+    }
+
+    // метод, который обновляет список файлов в правой таблице
+    public void updateListRight(FileListMessage fileList) {
+        System.out.println(fileList);
+        rightTableView.getItems().clear();
+        rightTableView.getItems().addAll(fileList.getListFile());
+        rightTableView.sort();
     }
 
     // метод, отвечающий за нажатие кнопки [Вверх] для левой панели
     public void leftBtnUpAction(ActionEvent actionEvent) {
         Path upperPath = Paths.get(leftFldPath.getText()).getParent();
         if (upperPath != null) {
-            updateList(upperPath, 1);
+            updateListLeft(upperPath);
         }
     }
 
-    // метод, отвечающий за нажатие кнопки [Вверх] для правой панели
+    // !!!!!!!!!!!!!!!!!!!!!!!!! метод, отвечающий за нажатие кнопки [Вверх] для правой панели
     public void rightBtnUpAction(ActionEvent actionEvent) {
         Path upperPath = Paths.get(rightFldPath.getText()).getParent();
         if (upperPath != null) {
-            updateList(upperPath, 2);
+//            updateList(upperPath, 2);
         }
     }
 
     // метод, отвечающий за работу левого Комбобокса
     public void leftComboAction(ActionEvent actionEvent) {
         ComboBox<String> element = (ComboBox<String>) actionEvent.getSource();
-        updateList(Paths.get(element.getSelectionModel().getSelectedItem()), 1);
+        updateListLeft(Paths.get(element.getSelectionModel().getSelectedItem()));
     }
 }

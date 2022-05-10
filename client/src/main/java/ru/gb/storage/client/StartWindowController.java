@@ -100,6 +100,8 @@ public class StartWindowController implements Initializable {
         primaryStage.setTitle("Сетевое хранилище");
         primaryStage.setScene(scene);
         primaryStage.setResizable(true);
+        primaryStage.setX(100.0);
+        primaryStage.setY(100.0);
         primaryStage.show();
     }
 

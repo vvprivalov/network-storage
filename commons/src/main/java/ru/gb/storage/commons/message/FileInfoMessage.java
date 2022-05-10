@@ -44,7 +44,8 @@ public class FileInfoMessage extends Message {
         this.lastModified = lastModified;
     }
 
-    public FileInfoMessage(Path path) {
+    public
+    FileInfoMessage fillInfoFile(Path path) {
         try {
             this.fileName = path.getFileName().toString();
             this.fileSize = Files.size(path);
@@ -60,5 +61,6 @@ public class FileInfoMessage extends Message {
         } catch (IOException e) {
             throw new RuntimeException("Ну удалось создать файл из указанного пути");
         }
+        return this;
     }
 }
