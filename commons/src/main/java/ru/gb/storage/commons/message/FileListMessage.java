@@ -25,7 +25,7 @@ public class FileListMessage extends Message {
             stringBuilder.append(" ");
             stringBuilder.append(file.getFileSize());
             stringBuilder.append(" ");
-            stringBuilder.append(file.getLastModified().toString());
+            stringBuilder.append(file.getLastModified());
             stringBuilder.append("\n");
         }
 

@@ -5,12 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class FileInfoMessage extends Message {
     private String fileName;
     private long fileSize;
     private String typeFile;
-    private LocalDateTime lastModified;
+    private String lastModified;
 
     public String getFileName() {
         return fileName;
@@ -36,16 +37,15 @@ public class FileInfoMessage extends Message {
         this.typeFile = typeFile;
     }
 
-    public LocalDateTime getLastModified() {
+    public String getLastModified() {
         return lastModified;
     }
 
-    public void setLastModified(LocalDateTime lastModified) {
+    public void setLastModified(String lastModified) {
         this.lastModified = lastModified;
     }
 
-    public
-    FileInfoMessage fillInfoFile(Path path) {
+    public FileInfoMessage fillInfoFile(Path path) {
         try {
             this.fileName = path.getFileName().toString();
             this.fileSize = Files.size(path);
@@ -56,10 +56,11 @@ public class FileInfoMessage extends Message {
             } else {
                 fileName = fileName.toLowerCase();
             }
+            DateTimeFormatter dtfR = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             this.lastModified = LocalDateTime.ofInstant(Files.getLastModifiedTime(path).toInstant(),
-                    ZoneOffset.ofHours(3));
+                    ZoneOffset.ofHours(3)).format(dtfR);
         } catch (IOException e) {
-            throw new RuntimeException("Ну удалось создать файл из указанного пути");
+            throw new RuntimeException("Не удалось создать файл из указанного пути");
         }
         return this;
     }

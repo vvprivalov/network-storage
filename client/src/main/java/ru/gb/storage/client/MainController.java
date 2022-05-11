@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import ru.gb.storage.commons.message.FileInfoMessage;
 import ru.gb.storage.commons.message.FileListMessage;
+import ru.gb.storage.commons.message.RequestUpdateFileListMessage;
 
 import java.io.IOException;
 import java.net.URL;
@@ -17,12 +18,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class MainController implements Initializable {
 
@@ -66,7 +64,7 @@ public class MainController implements Initializable {
     private Button rightBtnUp;
 
     @FXML
-    private TextField rightFldPath;
+    public TextField rightFldPath;
 
     @FXML
     private TableView<FileInfoMessage> rightTableView;
@@ -100,9 +98,9 @@ public class MainController implements Initializable {
         });
         leftFileSizeColumn.setPrefWidth(100);
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         TableColumn<FileInfoMessage, String> leftFileDateColumn = new TableColumn<>("Дата изменения");
-        leftFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified().format(dtf)));
+        leftFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified()));
         leftFileDateColumn.setPrefWidth(120);
 
         // Формирование правой панели
@@ -112,29 +110,26 @@ public class MainController implements Initializable {
 
         TableColumn<FileInfoMessage, Long> rightFileSizeColumn = new TableColumn<>("Размер");
         rightFileSizeColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getFileSize()));
-        rightFileSizeColumn.setCellFactory(column -> {
-            return new TableCell<FileInfoMessage, Long>() {
-                @Override
-                protected void updateItem(Long aLong, boolean b) {
-                    super.updateItem(aLong, b);
-                    if (aLong == null || b) {
-                        setText(null);
-                        setStyle("");
-                    } else {
-                        String text = String.format("%,d bytes", aLong);
-                        if (aLong == -1L) {
-                            text = "[ DIR ]";
-                        }
-                        setText(text);
+        rightFileSizeColumn.setCellFactory(column -> new TableCell<FileInfoMessage, Long>() {
+            @Override
+            protected void updateItem(Long aLong, boolean b) {
+                super.updateItem(aLong, b);
+                if (aLong == null || b) {
+                    setText(null);
+                    setStyle("");
+                } else {
+                    String text = String.format("%,d bytes", aLong);
+                    if (aLong == -1L) {
+                        text = "[ DIR ]";
                     }
+                    setText(text);
                 }
-            };
+            }
         });
         rightFileSizeColumn.setPrefWidth(100);
 
-        DateTimeFormatter dtfR = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         TableColumn<FileInfoMessage, String> rightFileDateColumn = new TableColumn<>("Дата изменения");
-        rightFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified().format(dtf)));
+        rightFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified()));
         rightFileDateColumn.setPrefWidth(120);
 
         // Добавляем сформированные колонки в таблицу
@@ -151,30 +146,24 @@ public class MainController implements Initializable {
         leftComboDisk.getSelectionModel().select(0);
 
         // Метод, который по двойному клику мыши заходит в каталог для левой панели
-        leftTableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    Path path = Paths.get(leftFldPath.getText()).resolve(leftTableView.getSelectionModel()
-                            .getSelectedItem().getFileName());
-                    if (Files.isDirectory(path)) {
-                        updateListLeft(path);
-                    }
+        leftTableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Path path = Paths.get(leftFldPath.getText()).resolve(leftTableView.getSelectionModel()
+                        .getSelectedItem().getFileName());
+                boolean b = Files.isDirectory(path);
+                if (Files.isDirectory(path)) {
+                    updateListLeft(path);
                 }
             }
         });
 
-        // !!!!!!!!!!!!!!!!!!!!! Метод, который по двойному клику мыши заходит в каталог для правой панели
-        rightTableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    Path path = Paths.get(rightFldPath.getText()).resolve(rightTableView.getSelectionModel()
-                            .getSelectedItem().getFileName());
-                    if (Files.isDirectory(path)) {
-//                        updateList(path, 2);
-                    }
-                }
+        // Метод, который по двойному клику мыши заходит в каталог для правой панели
+        rightTableView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                Path path = Paths.get(rightTableView.getSelectionModel().getSelectedItem().getFileName());
+                RequestUpdateFileListMessage requestUpdateFileListMessage = new RequestUpdateFileListMessage();
+                requestUpdateFileListMessage.setPath(path.toString());
+                Client.startController.channelFuture.channel().writeAndFlush(requestUpdateFileListMessage);
             }
         });
 
@@ -187,7 +176,7 @@ public class MainController implements Initializable {
         leftFldPath.setText(path.normalize().toAbsolutePath().toString());
         leftTableView.getItems().clear();
         try {
-            ArrayList <Path> listPath = (ArrayList<Path>) Files.list(path).collect(Collectors.toList());
+            ArrayList<Path> listPath = (ArrayList<Path>) Files.list(path).collect(Collectors.toList());
             for (Path pth : listPath) {
                 FileInfoMessage fileInfoMessage = new FileInfoMessage();
                 fileInfoMessage.fillInfoFile(pth);
@@ -199,18 +188,16 @@ public class MainController implements Initializable {
             alert.showAndWait();
         }
         leftTableView.sort();
-
     }
 
-    // метод, который обновляет список файлов в правой таблице
+    // Метод, который обновляет список файлов в правой таблице
     public void updateListRight(FileListMessage fileList) {
-        System.out.println(fileList);
         rightTableView.getItems().clear();
         rightTableView.getItems().addAll(fileList.getListFile());
         rightTableView.sort();
     }
 
-    // метод, отвечающий за нажатие кнопки [Вверх] для левой панели
+    // Метод, отвечающий за нажатие кнопки [Вверх] для левой панели
     public void leftBtnUpAction(ActionEvent actionEvent) {
         Path upperPath = Paths.get(leftFldPath.getText()).getParent();
         if (upperPath != null) {
@@ -218,12 +205,11 @@ public class MainController implements Initializable {
         }
     }
 
-    // !!!!!!!!!!!!!!!!!!!!!!!!! метод, отвечающий за нажатие кнопки [Вверх] для правой панели
+    // Метод, отвечающий за нажатие кнопки [Вверх] для правой панели
     public void rightBtnUpAction(ActionEvent actionEvent) {
-        Path upperPath = Paths.get(rightFldPath.getText()).getParent();
-        if (upperPath != null) {
-//            updateList(upperPath, 2);
-        }
+        RequestUpdateFileListMessage requestUpdateFileListMessage = new RequestUpdateFileListMessage();
+        requestUpdateFileListMessage.setPath("");
+        Client.startController.channelFuture.channel().writeAndFlush(requestUpdateFileListMessage);
     }
 
     // метод, отвечающий за работу левого Комбобокса
