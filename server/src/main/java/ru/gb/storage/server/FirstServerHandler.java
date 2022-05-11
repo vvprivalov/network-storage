@@ -63,6 +63,18 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
 
             }
         }
+
+        // Пришло сообщение о запросе на создание новой папки на сервере
+        if (msg instanceof RequestCreateDirectoryMessage) {
+            RequestCreateDirectoryMessage rcdm = (RequestCreateDirectoryMessage) msg;
+
+            try {
+                Files.createDirectory(Paths.get(dirCurrentClient + "\\"+ rcdm.getNewDir()));
+                ctx.writeAndFlush(updateListFile(dirCurrentClient));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     // Метод, который обрабатывает входящее сообщение с запросом на авторизацию существующего пользователя

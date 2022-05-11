@@ -3,13 +3,12 @@ package ru.gb.storage.client;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import ru.gb.storage.commons.message.FileInfoMessage;
 import ru.gb.storage.commons.message.FileListMessage;
+import ru.gb.storage.commons.message.RequestCreateDirectoryMessage;
 import ru.gb.storage.commons.message.RequestUpdateFileListMessage;
 
 import java.io.IOException;
@@ -49,7 +48,7 @@ public class MainController implements Initializable {
     private TableView<FileInfoMessage> leftTableView;
 
     @FXML
-    private Button rightBtnChange;
+    private Button rightBtnCreate;
 
     @FXML
     private Button rightBtnCopy;
@@ -136,7 +135,7 @@ public class MainController implements Initializable {
         leftTableView.getColumns().addAll(leftFileNameColumn, leftFileSizeColumn, leftFileDateColumn);
         leftTableView.getSortOrder().add(leftFileSizeColumn);
         rightTableView.getColumns().addAll(rightFileNameColumn, rightFileSizeColumn, rightFileDateColumn);
-        leftTableView.getSortOrder().add(rightFileSizeColumn);
+        rightTableView.getSortOrder().add(rightFileSizeColumn);
 
         // Формирование левого комбобокса для отображения списка дисков
         leftComboDisk.getItems().clear();
@@ -147,7 +146,7 @@ public class MainController implements Initializable {
 
         // Метод, который по двойному клику мыши заходит в каталог для левой панели
         leftTableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
+            if (event.getClickCount() == 2 && leftTableView.getSelectionModel().getSelectedItem() != null) {
                 Path path = Paths.get(leftFldPath.getText()).resolve(leftTableView.getSelectionModel()
                         .getSelectedItem().getFileName());
                 boolean b = Files.isDirectory(path);
@@ -159,7 +158,7 @@ public class MainController implements Initializable {
 
         // Метод, который по двойному клику мыши заходит в каталог для правой панели
         rightTableView.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
+            if (event.getClickCount() == 2 && rightTableView.getSelectionModel().getSelectedItem() != null) {
                 Path path = Paths.get(rightTableView.getSelectionModel().getSelectedItem().getFileName());
                 RequestUpdateFileListMessage requestUpdateFileListMessage = new RequestUpdateFileListMessage();
                 requestUpdateFileListMessage.setPath(path.toString());
@@ -216,5 +215,18 @@ public class MainController implements Initializable {
     public void leftComboAction(ActionEvent actionEvent) {
         ComboBox<String> element = (ComboBox<String>) actionEvent.getSource();
         updateListLeft(Paths.get(element.getSelectionModel().getSelectedItem()));
+    }
+
+    // Обработка нажатия кнопки правой панели о создании новой папки
+    public void rightBthCreateDirAction(ActionEvent actionEvent) {
+        TextInputDialog textInputDialog = new TextInputDialog();
+        textInputDialog.setHeaderText("Введите название новой папки");
+        textInputDialog.setTitle("Создание новой папки");
+        textInputDialog.showAndWait();
+        if (textInputDialog.getResult() != null) {
+            RequestCreateDirectoryMessage rcdm = new RequestCreateDirectoryMessage();
+            rcdm.setNewDir(textInputDialog.getResult());
+            Client.startController.channelFuture.channel().writeAndFlush(rcdm);
+        }
     }
 }

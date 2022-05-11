@@ -46,7 +46,8 @@
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <Button fx:id="rightBtnChange" mnemonicParsing="false" focusTraversable="false" text="Создать папку"/>
+            <Button fx:id="rightBtnCreate" mnemonicParsing="false" focusTraversable="false" text="Создать папку"
+            onAction="#rightBthCreateDirAction"/>
             <Button fx:id="rightBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
             <Button fx:id="rightBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
             <Button fx:id="rightBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"/>
