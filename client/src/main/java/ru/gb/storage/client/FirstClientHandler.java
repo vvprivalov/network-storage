@@ -3,6 +3,8 @@ package ru.gb.storage.client;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import ru.gb.storage.commons.message.*;
 
 import java.io.IOException;
@@ -39,6 +41,16 @@ public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
         if (message instanceof FldDirClientMessage) {
             FldDirClientMessage fldDirClientMessage = (FldDirClientMessage) message;
             Platform.runLater(() -> Client.mainController.rightFldPath.setText(fldDirClientMessage.getFldDir()));
+        }
+
+        // Сообщение от сервера о невозможно удаления файла или папки
+        if (message instanceof AnswerActionFileMessage) {
+            AnswerActionFileMessage answer = (AnswerActionFileMessage) message;
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION, answer.getAnswer(),
+                        ButtonType.OK);
+                alert.setHeaderText("Предупреждение");
+                alert.showAndWait();});
         }
     }
 }

@@ -6,10 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import ru.gb.storage.commons.message.FileInfoMessage;
-import ru.gb.storage.commons.message.FileListMessage;
-import ru.gb.storage.commons.message.RequestCreateDirectoryMessage;
-import ru.gb.storage.commons.message.RequestUpdateFileListMessage;
+import ru.gb.storage.commons.message.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -184,6 +182,7 @@ public class MainController implements Initializable {
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов",
                     ButtonType.OK);
+            alert.setHeaderText("Сообщение");
             alert.showAndWait();
         }
         leftTableView.sort();
@@ -218,7 +217,7 @@ public class MainController implements Initializable {
     }
 
     // Обработка нажатия кнопки правой панели о создании новой папки
-    public void rightBthCreateDirAction(ActionEvent actionEvent) {
+    public void rightBtnCreateDirAction(ActionEvent actionEvent) {
         TextInputDialog textInputDialog = new TextInputDialog();
         textInputDialog.setHeaderText("Введите название новой папки");
         textInputDialog.setTitle("Создание новой папки");
@@ -228,5 +227,30 @@ public class MainController implements Initializable {
             rcdm.setNewDir(textInputDialog.getResult());
             Client.startController.channelFuture.channel().writeAndFlush(rcdm);
         }
+    }
+
+    // Обработка нажатия кнопки правой панели об удалении файла
+    public void rightBtnDeleteFile(ActionEvent actionEvent) {
+        if (rightTableView.isFocused() && rightTableView.getSelectionModel().getSelectedItem() != null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Вы действительно хотите удалить?", ButtonType.OK, ButtonType.CANCEL);
+            alert.setTitle("Удаление файла");
+            alert.setHeaderText("Будьте внимательны!");
+            alert.showAndWait();
+            if (alert.getResult().getText().equals("OK") ) {
+                RequestDeleteFileMessage requestDeleteFileMessage = new RequestDeleteFileMessage();
+                requestDeleteFileMessage.setFileName(rightTableView.getSelectionModel().getSelectedItem().getFileName());
+                Client.startController.channelFuture.channel().writeAndFlush(requestDeleteFileMessage);
+            }
+        } else {
+            outputMessage("Выберите файл или папку для удаления");
+        }
+    }
+
+    // Метод выводит информационное окно на экран
+    public void outputMessage(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, message,
+                ButtonType.OK);
+        alert.setHeaderText("Сообщение");
+        alert.showAndWait();
     }
 }

@@ -64,7 +64,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             }
         }
 
-        // Пришло сообщение о запросе на создание новой папки на сервере
+        // Пришло сообщение с запросом на создание новой папки на сервере
         if (msg instanceof RequestCreateDirectoryMessage) {
             RequestCreateDirectoryMessage rcdm = (RequestCreateDirectoryMessage) msg;
 
@@ -74,6 +74,19 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        // Пришло сообщение с запросом на удаление файла или папки на сервере
+        if (msg instanceof RequestDeleteFileMessage) {
+            RequestDeleteFileMessage rdfm = (RequestDeleteFileMessage) msg;
+            try {
+                Files.delete(Paths.get(dirCurrentClient + "\\"+ rdfm.getFileName()));
+            } catch (IOException e) {
+                AnswerActionFileMessage message = new AnswerActionFileMessage();
+                message.setAnswer("Файл не удален, возможно это папка и она не пустая!!!");
+                ctx.writeAndFlush(message);
+            }
+            ctx.writeAndFlush(updateListFile(dirCurrentClient));
         }
     }
 
