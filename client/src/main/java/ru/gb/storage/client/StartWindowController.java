@@ -35,6 +35,7 @@ import java.util.concurrent.Executors;
 public class StartWindowController implements Initializable {
     SignInMessage signInMessage;
     ChannelFuture channelFuture;
+    ExecutorService threadpool;
 
     @FXML
     private VBox parentVBox;
@@ -106,7 +107,7 @@ public class StartWindowController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        ExecutorService threadpool = Executors.newFixedThreadPool(1);
+        threadpool = Executors.newFixedThreadPool(1);
         threadpool.execute(this::Connect);
     }
 
@@ -138,6 +139,7 @@ public class StartWindowController implements Initializable {
 
             }
             channelFuture.channel().closeFuture().sync();
+            threadpool.shutdownNow();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {

@@ -29,7 +29,8 @@
             </padding>
             <Button fx:id="leftBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
             <Button fx:id="leftBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
-            <Button fx:id="leftBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"/>
+            <Button fx:id="leftBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"
+                    onAction="#leftBtnDeleteAction"/>
         </HBox>
     </VBox>
     <VBox prefHeight="200.0" prefWidth="100.0" HBox.hgrow="ALWAYS">

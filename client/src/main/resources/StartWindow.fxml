@@ -48,6 +48,6 @@
    <HBox alignment="CENTER" prefHeight="29.0" prefWidth="600.0">
       <Label fx:id="lblMessage" alignment="TOP_CENTER" maxHeight="1.7976931348623157E308"
              maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="489.0"
-             text="Если вы зарегистрированы, пройдите атентификацию. Если нет, пройдите регистрацию!"/>
+             text="Если вы зарегистрированы, пройдите аутентификацию. Если нет, пройдите регистрацию!"/>
    </HBox>
 </VBox>

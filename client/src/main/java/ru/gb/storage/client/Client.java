@@ -1,6 +1,7 @@
 package ru.gb.storage.client;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -23,6 +24,12 @@ public class Client extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        startController.channelFuture.channel().close();
+        Platform.exit();
     }
 
     public static void main(String[] args) {

@@ -15,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -95,7 +94,6 @@ public class MainController implements Initializable {
         });
         leftFileSizeColumn.setPrefWidth(100);
 
-//        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         TableColumn<FileInfoMessage, String> leftFileDateColumn = new TableColumn<>("Дата изменения");
         leftFileDateColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified()));
         leftFileDateColumn.setPrefWidth(120);
@@ -226,6 +224,27 @@ public class MainController implements Initializable {
             RequestCreateDirectoryMessage rcdm = new RequestCreateDirectoryMessage();
             rcdm.setNewDir(textInputDialog.getResult());
             Client.startController.channelFuture.channel().writeAndFlush(rcdm);
+        }
+    }
+
+    // Обработка нажатия кнопки левой панели на удаление файла
+    public void leftBtnDeleteAction(ActionEvent actionEvent) {
+        if (leftTableView.isFocused() && leftTableView.getSelectionModel().getSelectedItem() != null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING, "Вы действительно хотите удалить?", ButtonType.OK, ButtonType.CANCEL);
+            alert.setTitle("Удаление файла");
+            alert.setHeaderText("Будьте внимательны!");
+            alert.showAndWait();
+            if (alert.getResult().getText().equals("OK") ) {
+                try {
+                    Files.delete(Paths.get(leftFldPath.getText() + "\\" + leftTableView.getSelectionModel()
+                            .getSelectedItem().getFileName()));
+                    updateListLeft(Paths.get(leftFldPath.getText()));
+                } catch (IOException e) {
+                    outputMessage("Не удалось удалить файл или папку!");
+                }
+            }
+        } else {
+            outputMessage("Выберите файл или папку для удаления");
         }
     }
 
