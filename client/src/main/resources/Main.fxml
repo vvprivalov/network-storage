@@ -17,18 +17,19 @@
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <ComboBox fx:id="leftComboDisk" focusTraversable="false"  prefWidth="60.0" onAction="#leftComboAction"/>
-            <TextField fx:id="leftFldPath" HBox.hgrow="ALWAYS" focusTraversable="false" disable="true" editable="false"/>
+            <ComboBox fx:id="leftComboDisk" focusTraversable="false" prefWidth="60.0" onAction="#leftComboAction"/>
+            <TextField fx:id="leftFldPath" HBox.hgrow="ALWAYS" focusTraversable="false" disable="true"
+                       editable="false"/>
             <Button fx:id="leftBtnUp" mnemonicParsing="false" focusTraversable="false" text="Вверх"
-            onAction="#leftBtnUpAction"/>
+                    onAction="#leftBtnUpAction"/>
         </HBox>
         <TableView fx:id="leftTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <Button fx:id="leftBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
-            <Button fx:id="leftBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
+            <Button fx:id="leftBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать на сервер"
+                    onAction="#leftBtnCopyAction"/>
             <Button fx:id="leftBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"
                     onAction="#leftBtnDeleteAction"/>
         </HBox>
@@ -38,9 +39,10 @@
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
-            <TextField fx:id="rightFldPath" focusTraversable="false" HBox.hgrow="ALWAYS" disable="true" editable="false"/>
+            <TextField fx:id="rightFldPath" focusTraversable="false" HBox.hgrow="ALWAYS" disable="true"
+                       editable="false"/>
             <Button fx:id="rightBtnUp" focusTraversable="false" mnemonicParsing="false" text="Вверх"
-            onAction="#rightBtnUpAction"/>
+                    onAction="#rightBtnUpAction"/>
         </HBox>
         <TableView fx:id="rightTableView" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS"/>
         <HBox alignment="TOP_CENTER" maxHeight="25.0" prefHeight="100.0" prefWidth="200.0" spacing="3.0">
@@ -48,11 +50,10 @@
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
             <Button fx:id="rightBtnCreate" mnemonicParsing="false" focusTraversable="false" text="Создать папку"
-            onAction="#rightBtnCreateDirAction"/>
-            <Button fx:id="rightBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать"/>
-            <Button fx:id="rightBtnMove" mnemonicParsing="false" focusTraversable="false" text="Переместить"/>
+                    onAction="#rightBtnCreateDirAction"/>
+            <Button fx:id="rightBtnCopy" mnemonicParsing="false" focusTraversable="false" text="Копировать на ПК"/>
             <Button fx:id="rightBtnDelete" mnemonicParsing="false" focusTraversable="false" text="Удалить"
-            onAction="#rightBtnDeleteFile"/>
+                    onAction="#rightBtnDeleteFile"/>
         </HBox>
     </VBox>
 </HBox>

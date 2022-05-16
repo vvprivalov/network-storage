@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import ru.gb.storage.commons.message.*;
 
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +17,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     private final UseDBforAuth useDBforAuth;
     private Path dirRootClient;
     private Path dirCurrentClient;
+    private String fldPath;
     private FldDirClientMessage fldDirCurrentClient;
 
     public FirstServerHandler(UseDBforAuth useDBforAuth) {
@@ -35,6 +37,46 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         SignAnswer signAnswer = new SignAnswer();
         TextInfoMessage textAnswer = new TextInfoMessage();
 
+        // Пришел запрос на сервер о проверке наличия указанного файла
+        if (msg instanceof RequestExistFileMessage) {
+            RequestExistFileMessage requestExistFileMessage = (RequestExistFileMessage) msg;
+            AnswerExistFileMessage answerExistFileMessage = new AnswerExistFileMessage();
+            if (Files.exists(Paths.get(dirCurrentClient + "\\" + requestExistFileMessage.getFileName()))) {
+                answerExistFileMessage.setExist(true);
+                answerExistFileMessage.setFileName(requestExistFileMessage.getFileName());
+                answerExistFileMessage.setFile(requestExistFileMessage.getFile());
+                System.out.println("Такой файл существует");
+            } else {
+                answerExistFileMessage.setExist(false);
+                answerExistFileMessage.setFileName(requestExistFileMessage.getFileName());
+                answerExistFileMessage.setFile(requestExistFileMessage.getFile());
+                System.out.println("Такой файл отсутствует");
+            }
+            try {
+                ctx.writeAndFlush(answerExistFileMessage).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Пришло сообщение о передаче файла на сторону сервера
+        if (msg instanceof TransferFileMessage) {
+            TransferFileMessage message = (TransferFileMessage) msg;
+            try (RandomAccessFile randomAccessFile = new RandomAccessFile(dirCurrentClient + "\\" +
+                    message.getFileName(), "rw")) {
+                randomAccessFile.seek(message.getStartPosition());
+                randomAccessFile.write(message.getContent());
+                if (message.isLast()) {
+                    AnswerActionFileMessage answer = new AnswerActionFileMessage();
+                    answer.setAnswer("Файл скопирован на сервер");
+                    ctx.writeAndFlush(answer);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ctx.writeAndFlush(updateListFile(dirCurrentClient));
+        }
+
         // Пришло сообщение об авторизации
         if (msg instanceof SignInMessage) {
             SignInMessageHandler(ctx, (SignInMessage) msg, signAnswer, textAnswer);
@@ -46,10 +88,11 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         }
 
         // Пришло сообщение о смене текущей папки клиента на сервере
+        // Если приходит пустая строка, то идем по дереву вверх, есть путь, то идем по дереву вниз.
         if (msg instanceof RequestUpdateFileListMessage) {
+            int lenght = dirRootClient.toString().length();
             RequestUpdateFileListMessage requestUpdateFileListMessage = (RequestUpdateFileListMessage) msg;
-            boolean b = requestUpdateFileListMessage.getPath().equals("");
-            if (!b) {
+            if (!requestUpdateFileListMessage.getPath().equals("")) {
                 Path path = Paths.get(dirCurrentClient.toString() + "\\" + requestUpdateFileListMessage.getPath());
                 if (Files.isDirectory(path)) {
                     dirCurrentClient = path;
@@ -62,6 +105,13 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
                 }
 
             }
+            if (!dirCurrentClient.equals(dirRootClient)) {
+                fldDirCurrentClient.setFldDir("Корневая папка клиента:\\ " + dirCurrentClient.toString().substring(lenght + 1));
+                ctx.writeAndFlush(fldDirCurrentClient);
+            } else {
+                fldDirCurrentClient.setFldDir("Корневая папка клиента:\\ ");
+                ctx.writeAndFlush(fldDirCurrentClient);
+            }
         }
 
         // Пришло сообщение с запросом на создание новой папки на сервере
@@ -69,7 +119,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             RequestCreateDirectoryMessage rcdm = (RequestCreateDirectoryMessage) msg;
 
             try {
-                Files.createDirectory(Paths.get(dirCurrentClient + "\\"+ rcdm.getNewDir()));
+                Files.createDirectory(Paths.get(dirCurrentClient + "\\" + rcdm.getNewDir()));
                 ctx.writeAndFlush(updateListFile(dirCurrentClient));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -80,7 +130,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         if (msg instanceof RequestDeleteFileMessage) {
             RequestDeleteFileMessage rdfm = (RequestDeleteFileMessage) msg;
             try {
-                Files.delete(Paths.get(dirCurrentClient + "\\"+ rdfm.getFileName()));
+                Files.delete(Paths.get(dirCurrentClient + "\\" + rdfm.getFileName()));
             } catch (IOException e) {
                 AnswerActionFileMessage message = new AnswerActionFileMessage();
                 message.setAnswer("Файл не удален, возможно это папка и она не пустая!!!");
@@ -88,6 +138,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             }
             ctx.writeAndFlush(updateListFile(dirCurrentClient));
         }
+
     }
 
     // Метод, который обрабатывает входящее сообщение с запросом на авторизацию существующего пользователя
@@ -103,7 +154,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             dirRootClient = Path.of("C:\\Storage\\" + "Dir_" + message.getLogin().trim() + "_client");
             dirCurrentClient = dirRootClient;
             ctx.writeAndFlush(updateListFile(dirRootClient));
-            fldDirCurrentClient.setFldDir("..");
+            fldDirCurrentClient.setFldDir("Корневая папка клиента");
             ctx.writeAndFlush(fldDirCurrentClient);
         } else {
             textAnswer.setText("Пользователь [ " + message.getLogin() + " ] или пароль не верны!!!");
@@ -126,7 +177,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
             ctx.writeAndFlush(signAnswer);
             dirRootClient = Path.of("C:\\Storage\\" + "Dir_" + message.getLogin().trim() + "_client");
             dirCurrentClient = dirRootClient;
-            fldDirCurrentClient.setFldDir("..");
+            fldDirCurrentClient.setFldDir("Корневая папка клиента");
             ctx.writeAndFlush(fldDirCurrentClient);
             try {
                 Files.createDirectory(dirRootClient);

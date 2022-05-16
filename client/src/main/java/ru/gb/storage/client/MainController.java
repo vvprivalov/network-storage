@@ -8,6 +8,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import ru.gb.storage.commons.message.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.FileSystems;
@@ -234,7 +235,7 @@ public class MainController implements Initializable {
             alert.setTitle("Удаление файла");
             alert.setHeaderText("Будьте внимательны!");
             alert.showAndWait();
-            if (alert.getResult().getText().equals("OK") ) {
+            if (alert.getResult().getText().equals("OK")) {
                 try {
                     Files.delete(Paths.get(leftFldPath.getText() + "\\" + leftTableView.getSelectionModel()
                             .getSelectedItem().getFileName()));
@@ -255,7 +256,7 @@ public class MainController implements Initializable {
             alert.setTitle("Удаление файла");
             alert.setHeaderText("Будьте внимательны!");
             alert.showAndWait();
-            if (alert.getResult().getText().equals("OK") ) {
+            if (alert.getResult().getText().equals("OK")) {
                 RequestDeleteFileMessage requestDeleteFileMessage = new RequestDeleteFileMessage();
                 requestDeleteFileMessage.setFileName(rightTableView.getSelectionModel().getSelectedItem().getFileName());
                 Client.startController.channelFuture.channel().writeAndFlush(requestDeleteFileMessage);
@@ -271,5 +272,21 @@ public class MainController implements Initializable {
                 ButtonType.OK);
         alert.setHeaderText("Сообщение");
         alert.showAndWait();
+    }
+
+    public void leftBtnCopyAction(ActionEvent actionEvent) {
+        if (leftTableView.isFocused() && leftTableView.getSelectionModel().getSelectedItem() != null) {
+            String fileName = leftTableView.getSelectionModel().getSelectedItem().getFileName();
+            File file = (Paths.get(leftFldPath.getText() + "\\" + leftTableView.getSelectionModel()
+                    .getSelectedItem().getFileName())).toFile();
+            RequestExistFileMessage requestExistFileMessage = new RequestExistFileMessage();
+            requestExistFileMessage.setFileName(fileName);
+            requestExistFileMessage.setFile(file);
+            try {
+                Client.startController.channelFuture.channel().writeAndFlush(requestExistFileMessage).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

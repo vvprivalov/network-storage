@@ -1,5 +1,6 @@
 package ru.gb.storage.client;
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import javafx.application.Platform;
@@ -7,9 +8,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import ru.gb.storage.commons.message.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
+    private RandomAccessFile accessFile;
+
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Message message) {
         // Текстовое сообщение от сервера для вывода пользователю внизу окна
@@ -49,8 +55,75 @@ public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
             Platform.runLater(() -> {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, answer.getAnswer(),
                         ButtonType.OK);
-                alert.setHeaderText("Предупреждение");
-                alert.showAndWait();});
+                alert.setHeaderText("Сообщение");
+                alert.showAndWait();
+            });
+        }
+
+        // Пришло сообщение о наличии файла для копирования
+        if (message instanceof AnswerExistFileMessage) {
+            AnswerExistFileMessage answerExistFileMessage = (AnswerExistFileMessage) message;
+            String fileName = answerExistFileMessage.getFileName();
+            File file = answerExistFileMessage.getFile();
+
+            if (answerExistFileMessage.isExist()) {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.WARNING, "Вы действительно хотите заменить файл на сервере?", ButtonType.OK, ButtonType.CANCEL);
+                    alert.setTitle("Замена файла");
+                    alert.setHeaderText("Будьте внимательны!");
+                    alert.showAndWait();
+                    if (alert.getResult().getText().equals("OK")) {
+                        try {
+                            accessFile = new RandomAccessFile(file, "r");
+                            sendFile(fileName);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            } else {
+                try {
+                    accessFile = new RandomAccessFile(file, "r");
+                    sendFile(fileName);
+                } catch (FileNotFoundException e) {
+                    Platform.runLater(() -> Client.mainController.outputMessage("Не удалось открыть файл, возможно это папка!"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    private void sendFile(String fileName) throws IOException {
+        if (accessFile != null) {
+            byte[] fileContent;
+            long availableBytes = accessFile.length() - accessFile.getFilePointer();
+            int BUFFER_SIZE = 64 * 1024;
+            if (availableBytes > BUFFER_SIZE) {
+                fileContent = new byte[BUFFER_SIZE];
+            } else {
+                fileContent = new byte[(int) availableBytes];
+            }
+            TransferFileMessage message = new TransferFileMessage();
+            message.setStartPosition(accessFile.getFilePointer());
+            accessFile.read(fileContent);
+            message.setContent(fileContent);
+            message.setFileName(fileName);
+            final boolean last = accessFile.getFilePointer() == accessFile.length();
+            message.setLast(last);
+            if (last) {
+                accessFile.close();
+                accessFile = null;
+            }
+            Client.startController.channelFuture.channel().writeAndFlush(message)
+                    .addListener((ChannelFutureListener) channelFuture -> {
+                        if (!last) {
+                            sendFile(fileName);
+                        }
+                    });
         }
     }
 }
