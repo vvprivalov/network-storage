@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.file.Paths;
 
 public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
     private RandomAccessFile accessFile;
@@ -47,6 +48,22 @@ public class FirstClientHandler extends SimpleChannelInboundHandler<Message> {
         if (message instanceof FldDirClientMessage) {
             FldDirClientMessage fldDirClientMessage = (FldDirClientMessage) message;
             Platform.runLater(() -> Client.mainController.rightFldPath.setText(fldDirClientMessage.getFldDir()));
+        }
+
+        // Пришло сообщение о передаче файла с сервера на сторону клиента
+        if (message instanceof TransferFileMessage) {
+            TransferFileMessage msg = (TransferFileMessage) message;
+            try (RandomAccessFile randomAccessFile = new RandomAccessFile(
+                    Client.mainController.leftFldPath.getText() + "\\" + msg.getFileName(), "rw")) {
+                randomAccessFile.seek(msg.getStartPosition());
+                randomAccessFile.write(msg.getContent());
+                if (msg.isLast()) {
+                    Platform.runLater(() -> Client.mainController.outputMessage("Файл скопирован на ваш ПК"));
+                    Client.mainController.updateListLeft(Paths.get(Client.mainController.leftFldPath.getText()));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // Сообщение от сервера о невозможно удаления файла или папки

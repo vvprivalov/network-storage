@@ -1,9 +1,12 @@
 package ru.gb.storage.server;
 
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import ru.gb.storage.commons.message.*;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
@@ -19,6 +22,7 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
     private Path dirCurrentClient;
     private String fldPath;
     private FldDirClientMessage fldDirCurrentClient;
+    private RandomAccessFile accessFile;
 
     public FirstServerHandler(UseDBforAuth useDBforAuth) {
 
@@ -37,6 +41,21 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
         SignAnswer signAnswer = new SignAnswer();
         TextInfoMessage textAnswer = new TextInfoMessage();
 
+        // Пришел запрос о копировании файла с сервера на ПК клиента(нажата кнопка "Копировать на ПК")
+        if (msg instanceof RequestCopyFileMessage) {
+            RequestCopyFileMessage requestCopyFileMessage = (RequestCopyFileMessage) msg;
+            File file = Paths.get(dirCurrentClient + "\\" + requestCopyFileMessage.getFileName()).toFile();
+            try {
+                accessFile = new RandomAccessFile(file, "r");
+                sendFile(requestCopyFileMessage.getFileName(), ctx);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
         // Пришел запрос на сервер о проверке наличия указанного файла
         if (msg instanceof RequestExistFileMessage) {
             RequestExistFileMessage requestExistFileMessage = (RequestExistFileMessage) msg;
@@ -45,12 +64,10 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
                 answerExistFileMessage.setExist(true);
                 answerExistFileMessage.setFileName(requestExistFileMessage.getFileName());
                 answerExistFileMessage.setFile(requestExistFileMessage.getFile());
-                System.out.println("Такой файл существует");
             } else {
                 answerExistFileMessage.setExist(false);
                 answerExistFileMessage.setFileName(requestExistFileMessage.getFileName());
                 answerExistFileMessage.setFile(requestExistFileMessage.getFile());
-                System.out.println("Такой файл отсутствует");
             }
             try {
                 ctx.writeAndFlush(answerExistFileMessage).sync();
@@ -222,4 +239,34 @@ public class FirstServerHandler extends SimpleChannelInboundHandler<Message> {
 
         System.out.println("Клиент отключился");
     }
+
+    private void sendFile(String fileName, ChannelHandlerContext ctx) throws IOException {
+        if (accessFile != null) {
+            byte[] fileContent;
+            long availableBytes = accessFile.length() - accessFile.getFilePointer();
+            int BUFFER_SIZE = 64 * 1024;
+            if (availableBytes > BUFFER_SIZE) {
+                fileContent = new byte[BUFFER_SIZE];
+            } else {
+                fileContent = new byte[(int) availableBytes];
+            }
+            TransferFileMessage message = new TransferFileMessage();
+            message.setStartPosition(accessFile.getFilePointer());
+            accessFile.read(fileContent);
+            message.setContent(fileContent);
+            message.setFileName(fileName);
+            final boolean last = accessFile.getFilePointer() == accessFile.length();
+            message.setLast(last);
+            if (last) {
+                accessFile.close();
+                accessFile = null;
+            }
+            ctx.writeAndFlush(message).addListener((ChannelFutureListener) channelFuture -> {
+                        if (!last) {
+                            sendFile(fileName, ctx);
+                        }
+                    });
+        }
+    }
+
 }

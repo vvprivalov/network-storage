@@ -40,7 +40,7 @@ public class MainController implements Initializable {
     private ComboBox<String> leftComboDisk;
 
     @FXML
-    private TextField leftFldPath;
+    public TextField leftFldPath;
 
     @FXML
     private TableView<FileInfoMessage> leftTableView;
@@ -284,6 +284,21 @@ public class MainController implements Initializable {
             requestExistFileMessage.setFile(file);
             try {
                 Client.startController.channelFuture.channel().writeAndFlush(requestExistFileMessage).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Обработка нажатия кнопки "Копировать на ПК" на правой панели(серверная сторона)
+    public void rightBtnCopyAction(ActionEvent actionEvent) {
+        if (rightTableView.isFocused() && rightTableView.getSelectionModel().getSelectedItem() != null) {
+            String fileName = rightTableView.getSelectionModel().getSelectedItem().getFileName();
+            RequestCopyFileMessage requestCopyFileMessage = new RequestCopyFileMessage();
+            requestCopyFileMessage.setFileName(fileName);
+            requestCopyFileMessage.setExist(Files.exists(Paths.get(leftFldPath.getText() + fileName)));
+            try {
+                Client.startController.channelFuture.channel().writeAndFlush(requestCopyFileMessage).sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

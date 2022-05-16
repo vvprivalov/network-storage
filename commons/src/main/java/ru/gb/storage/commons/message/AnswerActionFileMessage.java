@@ -1,6 +1,6 @@
 package ru.gb.storage.commons.message;
 
-public class AnswerActionFileMessage extends Message{
+public class AnswerActionFileMessage extends Message {
     String answer;
 
     public String getAnswer() {
